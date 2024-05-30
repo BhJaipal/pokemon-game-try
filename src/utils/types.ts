@@ -17,17 +17,14 @@ export type PokemonTypeNames =
 	| "ice"
 	| "electric"
 	| "flying";
-export type PokemonMovesList = [
-	PokemonMove,
-	PokemonMove,
-	PokemonMove,
-	PokemonMove
-];
+export type PokemonMovesList =
+	| [PokemonMove, PokemonMove, PokemonMove, PokemonMove]
+	| [PokemonMove, PokemonMove, PokemonMove];
 export class Pokemon {
 	constructor(
 		public type: PokemonTypeNames | [PokemonTypeNames, PokemonTypeNames],
 		public name: string,
-		public moves: Array<PokemonTypeNames>,
+		public moves: PokemonMovesList,
 		public levitate = false
 	) {}
 }
