@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import treeD from "./components/threeD.vue";
+import threeD from "./components/threeD.vue";
 </script>
 <template>
 	<div>
@@ -10,7 +10,7 @@ import treeD from "./components/threeD.vue";
 			<img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
 		</a>
 	</div>
-	<treeD class="three-d" />
+	<threeD class="three-d" />
 </template>
 
 <style scoped>
