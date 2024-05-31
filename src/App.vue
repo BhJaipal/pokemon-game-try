@@ -1,6 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import treeD from "./components/threeD.vue";
 </script>
-
 <template>
 	<div>
 		<a href="https://vitejs.dev" target="_blank">
@@ -10,6 +10,7 @@
 			<img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
 		</a>
 	</div>
+	<treeD class="three-d" />
 </template>
 
 <style scoped>
@@ -24,5 +25,9 @@
 }
 .logo.vue:hover {
 	filter: drop-shadow(0 0 2em #42b883aa);
+}
+.three-d {
+	width: 1000px;
+	height: 700px;
 }
 </style>
