@@ -2,6 +2,13 @@
 // @ts-nocheck
 import { OrbitControls, GLTFModel, vLog } from "@tresjs/cientos";
 import * as THREE from "three";
+
+let gl = {
+	shadows: true,
+	shadowMapType: THREE.BasicShadowMap,
+	outputColorSpace: THREE.SRGBColorSpace,
+	toneMapping: THREE.NoToneMapping,
+};
 </script>
 <script lang="ts">
 export default {
@@ -10,18 +17,21 @@ export default {
 </script>
 <template>
 	<div class="three-d">
-		<TresCanvas clear-color="#88F">
-			<TresPerspectiveCamera :position="[0, 0, 5]" />
+		<TresCanvas clear-color="#88F" v-bind="gl">
+			<TresPerspectiveCamera
+				:position="[0, 0, 5]"
+				:rotation="[0, 0, 0]"
+			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
 			<TresMesh
-				:rotation="[Math.PI / 3, 0, 0]"
-				:position="[-2, -2, 0]"
+				:rotation="[-Math.PI / 2, Math.PI / 36, -Math.PI / 2.5]"
+				:position="[-2, -1.5, 0]"
 				receive-shadow
 			>
-				<TresPlaneGeometry :args="[2, 2, 2, 2]" />
+				<TresPlaneGeometry :args="[1.7, 1.7]" />
 				<TresMeshBasicMaterial color="#0f0" />
 			</TresMesh>
-			<TresMesh :position="[2, 2, 0]" :rotation="[0, Math.PI, 0]">
+			<TresMesh :position="[2, 1.5, 0]" :rotation="[0, Math.PI, 0]">
 				<TresConeGeometry :args="[1, 1.5, 3]" />
 				<TresMeshToonMaterial color="#82DBC5" />
 			</TresMesh>
@@ -30,7 +40,7 @@ export default {
 				:position="[2, 0, 0]"
 				receive-shadow
 			>
-				<TresPlaneGeometry :args="[2, 2, 2, 2]" />
+				<TresPlaneGeometry :args="[2, 2, 2, 2]" color="#0f0" />
 				<TresMeshBasicMaterial color="#0f0" />
 			</TresMesh>
 			<!-- <Suspense>
