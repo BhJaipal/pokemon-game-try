@@ -237,9 +237,9 @@ export function attackResultEffect(move: PokemonMove, target: Pokemon) {
 }
 export function howMuchEffective(num: number) {
 	if (num == 0) {
-		return "No Effect";
+		return "No effect";
 	} else if (num == 0.5) {
-		return "Not Very Effective";
+		return "Not very effective";
 	} else if (num == 1) {
 		return "Effective";
 	} else if (num == 2) {

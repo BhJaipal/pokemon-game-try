@@ -1,5 +1,6 @@
 <script lang="ts">
-import { OrbitControls, GLTFModel, vLog } from "@tresjs/cientos";
+import { OrbitControls, GLTFModel, FBXModel, vLog } from "@tresjs/cientos";
+import { attackResultEffect, howMuchEffective } from "./../utils/pokemon-types";
 export default {
 	name: "three-d",
 	directives: {
@@ -8,7 +9,9 @@ export default {
 	components: {
 		OrbitControls,
 		GLTFModel,
+		FBXModel,
 	},
+	methods: { attackResultEffect, howMuchEffective },
 };
 </script>
 <script setup lang="ts">
@@ -16,7 +19,6 @@ export default {
 import { ref } from "vue";
 import * as THREE from "three";
 import { fireTypes, waterTypes } from "./../data/pokemons";
-import { attackResultEffect, howMuchEffective } from "./../utils/pokemon-types";
 
 let gl = {
 	shadows: true,
@@ -31,19 +33,21 @@ let players = ref({
 });
 </script>
 <template>
-	<div class="game-ui bg-transparent">
+	<div class="bg-transparent game-ui">
 		<div class="options">
 			<button
 				v-for="(move, i) in players.p1.moves"
 				:key="i"
 				:class="'w-full moves ' + move.moveType"
 			>
-				<img
-					class="move-type"
-					:src="'/types-icon/' + move.moveType + '.svg'"
-					:alt="move.moveType"
-				/>
-				<div class="flex flex-col">
+				<div>
+					<img
+						class="move-type"
+						:src="'/types-icon/' + move.moveType + '.svg'"
+						:alt="move.moveType"
+					/>
+				</div>
+				<div class="flex flex-col move-name-box">
 					<div class="move-name">{{ move.moveName }}</div>
 					<div>
 						{{
@@ -101,6 +105,18 @@ let players = ref({
 	</div>
 </template>
 <style scoped>
+.options {
+	border: 2px solid transparent;
+	width: 15vw;
+	height: calc(28vh + 20px * 3);
+	gap: 20px;
+	display: grid;
+	grid-template-rows: repeat(4, minmax(0, 1fr));
+	bottom: 5vh;
+	position: fixed;
+	right: 5vh;
+	border-image-slice: 1;
+}
 .three-d {
 	width: 100vw;
 	height: 100vh;
@@ -116,81 +132,57 @@ let players = ref({
 	position: absolute;
 	z-index: 1;
 }
-@keyframes borderAnimation {
-	0% {
-		border-image: linear-gradient(
-				to bottom right,
-				#ff0000,
-				#00ff00,
-				#0000ff
-			)
-			1;
-	}
-	25% {
-		border-image: linear-gradient(
-				to bottom right,
-				#00ff00,
-				#00ff00,
-				#00ff00,
-				#00ff00,
-				#0000ff
-			)
-			1;
-	}
+
+@keyframes moveGradient {
 	50% {
-		border-image: linear-gradient(
-				to bottom right,
-				#00ff00,
-				#0000ff,
-				#ff0000
-			)
-			1;
-	}
-	75% {
-		border-image: linear-gradient(
-				to bottom right,
-				#ff0000,
-				#ff0000,
-				#ff0000,
-				#ff0000,
-				#00ff00
-			)
-			1;
-	}
-	100% {
-		border-image: linear-gradient(
-				to bottom right,
-				#0000ff,
-				#ff0000,
-				#00ff00
-			)
-			1;
+		background-position: 100% 50%;
 	}
 }
-.options {
-	border: 2px solid transparent;
-	width: 15vw;
-	height: 28vh;
-	display: grid;
-	grid-template-rows: repeat(4, minmax(0, 1fr));
-	bottom: 5vh;
-	position: fixed;
-	right: 5vh;
-	border-image: radial-gradient(to bottom right, #ff0000, #00ff00) 1;
-	border-image-slice: 1;
-	animation: borderAnimation 1s linear infinite;
-}
+
 .moves {
+	border-image: radial-gradient(to bottom right, #ff0000, #00ff00) 1;
 	border: 2px solid transparent;
 	background-color: aliceblue;
 	color: black;
 	border-image: inherit;
+	position: relative;
+	display: flex;
+	border-radius: 3px;
+}
+.moves::after {
+	--border-width: 5px;
+	position: absolute;
+	content: "";
+	top: calc(-1 * var(--border-width));
+	left: calc(-1 * var(--border-width));
+	z-index: -1;
+	width: calc(100% + var(--border-width) * 2);
+	height: calc(100% + var(--border-width) * 2);
+	background: linear-gradient(
+		60deg,
+		hsl(224, 85%, 66%),
+		hsl(269, 85%, 66%),
+		hsl(314, 85%, 66%),
+		hsl(359, 85%, 66%),
+		hsl(44, 85%, 66%),
+		hsl(89, 85%, 66%),
+		hsl(134, 85%, 66%),
+		hsl(179, 85%, 66%)
+	);
+	background-size: 300% 300%;
+	background-position: 0 50%;
+	border-radius: calc(2 * var(--border-width));
+	animation: moveGradient 4s alternate infinite;
 }
 .move-name {
 	font-weight: bolder;
 }
+.move-name-box {
+	width: 100%;
+	text-align: center;
+}
 .move-type {
-	height: 3vh;
+	height: 4vh;
 	float: left;
 }
 .flying {
@@ -198,5 +190,8 @@ let players = ref({
 }
 .dragon {
 	background-color: blueviolet;
+}
+.fire {
+	background-color: coral;
 }
 </style>
