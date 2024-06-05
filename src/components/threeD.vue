@@ -1,6 +1,7 @@
 <script lang="ts">
 import { OrbitControls, GLTFModel, FBXModel, vLog } from "@tresjs/cientos";
 import { attackResultEffect, howMuchEffective } from "./../utils/pokemon-types";
+import { TresCanvas } from "@tresjs/core";
 export default {
 	name: "three-d",
 	directives: {
@@ -10,6 +11,7 @@ export default {
 		OrbitControls,
 		GLTFModel,
 		FBXModel,
+		TresCanvas,
 	},
 	methods: { attackResultEffect, howMuchEffective },
 };
@@ -22,6 +24,7 @@ import { fireTypes, waterTypes } from "./../data/pokemons";
 
 let gl = {
 	shadows: true,
+	alpha: false,
 	shadowMapType: THREE.BasicShadowMap,
 	outputColorSpace: THREE.SRGBColorSpace,
 	toneMapping: THREE.NoToneMapping,
@@ -67,36 +70,47 @@ let players = ref({
 				:rotation="[0, 0, 0]"
 			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
+			<!-- Player 1 -->
+			<Suspense>
+				<GLTFModel
+					path="/poke_ball.glb"
+					:position="[-2.5, -1, 0]"
+					v-log
+					v-bind="{ castShadow: true }"
+					:cast-shadow="true"
+				/>
+			</Suspense>
 			<TresMesh
 				:rotation="[-Math.PI / 2, Math.PI / 36, -Math.PI / 2.5]"
 				:position="[-2, -1.5, 0]"
 				receive-shadow
 			>
 				<TresPlaneGeometry :args="[1.7, 1.7]" />
-				<TresMeshBasicMaterial color="#0f0" />
+				<TresMeshStandardMaterial color="#0f0" />
 			</TresMesh>
-			<TresMesh :position="[2, 1.5, 0]" :rotation="[0, Math.PI, 0]">
+			<!-- Player 2 -->
+			<TresMesh
+				:position="[2, 1.5, 0]"
+				:rotation="[0, Math.PI, 0]"
+				cast-shadow
+			>
 				<TresConeGeometry :args="[1, 1.5, 3]" />
 				<TresMeshToonMaterial color="#82DBC5" />
 			</TresMesh>
 			<TresMesh
-				:rotation="[-Math.PI / 2.2, 0, 0]"
+				:rotation="[
+					-Math.PI / 2.2,
+					-Math.PI / 72,
+					Math.PI / 3 - Math.PI / 2.3,
+				]"
 				:position="[2, 0, 0]"
 				receive-shadow
 			>
 				<TresPlaneGeometry :args="[2, 2, 2, 2]" color="#0f0" />
-				<TresMeshBasicMaterial color="#0f0" />
+				<TresMeshStandardMaterial color="#0f0" />
 			</TresMesh>
-			<Suspense>
-				<GLTFModel
-					path="/planet.gltf"
-					:position="[-2, 0, 0]"
-					v-log
-					cast-shadow
-				/>
-			</Suspense>
 			<TresDirectionalLight
-				:position="[0, 1, 0]"
+				:position="[0, 2, 0]"
 				:intensity="1"
 				cast-shadow
 			/>
@@ -147,6 +161,7 @@ let players = ref({
 	border-image: inherit;
 	position: relative;
 	display: flex;
+	border-radius: 100px;
 	border-radius: 3px;
 }
 .moves::after {
@@ -171,7 +186,7 @@ let players = ref({
 	);
 	background-size: 300% 300%;
 	background-position: 0 50%;
-	border-radius: calc(2 * var(--border-width));
+	border-radius: calc(1 * var(--border-width));
 	animation: moveGradient 4s alternate infinite;
 }
 .move-name {
