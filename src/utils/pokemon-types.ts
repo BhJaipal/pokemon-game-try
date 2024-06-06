@@ -247,7 +247,7 @@ export function howMuchEffective(num: number) {
 	}
 }
 type positionArr = [number, number, number];
-export function posAdd(pos: positionArr, add: positionArr = [4, 1.5, 0]) {
+export function posAdd(pos: positionArr, add: positionArr = [4, 0, 0]) {
 	return [pos[0] + add[0], pos[1] + add[1], pos[2] + add[2]];
 }
 export function resultAttackResultEffect(num: number, poke: Pokemon) {

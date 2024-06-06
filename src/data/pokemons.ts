@@ -7,7 +7,7 @@ export const fireTypes = {
 		"Charmander",
 		[moves.normal.scratch, moves.normal.tackle, moves.fire.ember],
 		[0.01, 0.01, 0.01],
-		[-2, -1.5, 0],
+		[-2, 0, 0],
 		"/fire/charmander.glb"
 	),
 	charmeleon: new Pokemon(
@@ -20,7 +20,7 @@ export const fireTypes = {
 			moves.normal.tackle,
 		],
 		[0.3, 0.3, 0.3],
-		[-2, -0.5, 0],
+		[-2, 0, 0],
 		"/fire/charmeleon.glb"
 	),
 	charizard: new Pokemon(
@@ -33,7 +33,7 @@ export const fireTypes = {
 			moves.flying.fly,
 		],
 		[0.05, 0.05, 0.05],
-		[-2, -1.5, 0],
+		[-2, 0, 0],
 		"/fire/charizard.glb"
 	),
 };
@@ -48,7 +48,7 @@ export const grassTypes = {
 			moves.normal.tackle,
 		],
 		[0.2, 0.2, 0.2],
-		[-2, -1.5, 0],
+		[-2, 0, 0],
 		"/grass/bulbasaur.glb"
 	),
 	ivysaur: new Pokemon(
@@ -61,7 +61,7 @@ export const grassTypes = {
 			moves.grass.leafStorm,
 		],
 		[0.01, 0.01, 0.01],
-		[-1.8, -1.55, -0.5],
+		[-1.8, 0, -0.5],
 		"/grass/ivysaur.glb"
 	),
 	venasaur: new Pokemon(
@@ -74,7 +74,7 @@ export const grassTypes = {
 			moves.poison.sludgeBomb,
 		],
 		[0.03, 0.03, 0.03],
-		[-2, -1.5, 0],
+		[-2, 0, 0],
 		"/grass/venusaur.glb"
 	),
 };
@@ -84,7 +84,7 @@ export const waterTypes = {
 		"Squirtle",
 		[moves.water.waterGun, moves.water.waterPulse, moves.normal.tackle],
 		[0.2, 0.2, 0.2],
-		[-2, -1.05, 0],
+		[-2, 0, 0],
 		"/water/squirtle.glb"
 	),
 	wartortle: new Pokemon(
@@ -97,7 +97,7 @@ export const waterTypes = {
 			moves.normal.tackle,
 		],
 		[0.2, 0.2, 0.2],
-		[-2, -0.9, 0],
+		[-2, 0, 0],
 		"/water/wartortle.glb"
 	),
 	blastoise: new Pokemon(
@@ -110,7 +110,7 @@ export const waterTypes = {
 			moves.water.aquaTail,
 		],
 		[0.1, 0.1, 0.1],
-		[-2, -1.5, 0],
+		[-2, 0, 0],
 		"/water/blastoise.glb"
 	),
 };

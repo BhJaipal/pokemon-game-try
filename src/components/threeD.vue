@@ -162,7 +162,7 @@ function fight(move: PokemonMove) {
 	}
 	sleep.value = 1000;
 }
-let cameraPos = [0, 0, 5];
+let cameraPos = [0, 0, 4.5];
 </script>
 <template>
 	<div class="three-d">
@@ -218,40 +218,29 @@ let cameraPos = [0, 0, 5];
 					:path="players.p1.src"
 					:position="players.p1.position"
 					:scale="players.p1.scale"
-					:rotation="[0, (5 * Math.PI) / 6, 0]"
+					:rotation="[0, Math.PI / 2, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
 				/>
 			</Suspense>
-			<TresMesh
-				:rotation="[-Math.PI / 2, Math.PI / 36, -Math.PI / 2.5]"
-				:position="[-2, -1.5, 0]"
-				receive-shadow
-			>
-				<TresPlaneGeometry :args="[1.7, 1.7]" />
-				<TresMeshStandardMaterial color="#0f0" />
-			</TresMesh>
 			<!-- Player 2 -->
 			<Suspense>
 				<GLTFModel
 					:path="players.p2.src"
 					:position="posAdd(players.p2.position)"
 					:scale="players.p2.scale"
-					:rotation="[0, -Math.PI / 3, 0]"
+					:rotation="[0, -Math.PI / 2, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
 				/>
 			</Suspense>
+			<!-- Ground and Lights -->
 			<TresMesh
-				:rotation="[
-					-Math.PI / 2.2,
-					-Math.PI / 72,
-					Math.PI / 3 - Math.PI / 2.3,
-				]"
-				:position="[2, 0, 0]"
+				:rotation="[-Math.PI / 2.4, 0, 0]"
+				:position="[0, 0, 0]"
 				receive-shadow
 			>
-				<TresPlaneGeometry :args="[2, 2, 2, 2]" color="#0f0" />
+				<TresPlaneGeometry :args="[6, 2, 2, 2]" color="#0f0" />
 				<TresMeshStandardMaterial color="#0f0" />
 			</TresMesh>
 			<TresDirectionalLight
@@ -314,8 +303,8 @@ let cameraPos = [0, 0, 5];
 	display: flex;
 	width: 25vw;
 	flex-direction: row;
-	left: 15vw;
-	margin-top: 55vh;
+	left: 12vw;
+	margin-top: 20vh;
 }
 .p1-hp > div:first-child {
 	border-top-left-radius: 20px;
@@ -345,7 +334,7 @@ let cameraPos = [0, 0, 5];
 	flex-direction: row;
 	display: flex;
 	width: 25vw;
-	left: 60vw;
+	left: 62vw;
 	margin-top: 20vh;
 }
 .moves {
