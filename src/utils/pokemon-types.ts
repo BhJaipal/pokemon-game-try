@@ -246,3 +246,18 @@ export function howMuchEffective(num: number) {
 		return "Super Effective";
 	}
 }
+type positionArr = [number, number, number];
+export function posAdd(pos: positionArr, add: positionArr = [4, 1.5, 0]) {
+	return [pos[0] + add[0], pos[1] + add[1], pos[2] + add[2]];
+}
+export function resultAttackResultEffect(num: number, poke: Pokemon) {
+	if (num == 0) {
+		return `It does not effect ${poke.name}`;
+	} else if (num == 0.5) {
+		return "It's not very effective";
+	} else if (num == 1) {
+		return "It's effective";
+	} else {
+		return "It's super effective";
+	}
+}

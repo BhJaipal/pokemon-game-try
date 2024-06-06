@@ -25,6 +25,9 @@ export class Pokemon {
 		public type: PokemonTypeNames | [PokemonTypeNames, PokemonTypeNames],
 		public name: string,
 		public moves: PokemonMovesList,
+		public scale: [number, number, number] = [1, 1, 1],
+		public position: [number, number, number] = [-2.5, -1, 0],
+		public src = "",
 		public levitate = false
 	) {}
 }

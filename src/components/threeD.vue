@@ -2,6 +2,7 @@
 import { OrbitControls, GLTFModel, FBXModel, vLog } from "@tresjs/cientos";
 import { attackResultEffect, howMuchEffective } from "./../utils/pokemon-types";
 import { TresCanvas } from "@tresjs/core";
+import { PokemonMove } from "../utils/types";
 export default {
 	name: "three-d",
 	directives: {
@@ -17,10 +18,10 @@ export default {
 };
 </script>
 <script setup lang="ts">
-// @ts-nocheck
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import * as THREE from "three";
-import { fireTypes, waterTypes } from "./../data/pokemons";
+import { fireTypes, grassTypes } from "./../data/pokemons";
+import { posAdd, resultAttackResultEffect } from "./../utils/pokemon-types";
 
 let gl = {
 	shadows: true,
@@ -30,17 +31,150 @@ let gl = {
 	toneMapping: THREE.NoToneMapping,
 };
 
+let sleep = ref(1000);
 let players = ref({
 	p1: fireTypes.charizard,
-	p2: waterTypes.blastoise,
+	p1Hp: 200,
+	p2Hp: 200,
+	p2: grassTypes.venasaur,
 });
+let HPs = reactive({
+	p1: players.value.p1Hp / 2,
+	p2: players.value.p2Hp / 2,
+});
+let resultShow = reactive({
+	message: "",
+	show: false,
+});
+let usingMove = ref(false);
+function fight(move: PokemonMove) {
+	usingMove.value = true;
+	resultShow.show = true;
+	resultShow.message = `${players.value.p1.name} used ${move.moveName}`;
+	let eff = attackResultEffect(move, players.value.p2);
+	if (eff * move.damage > players.value.p2Hp) {
+		// p2 HP 0
+		for (let i = 0; i < players.value.p2Hp; i++) {
+			setTimeout(() => {
+				players.value.p2Hp--;
+				HPs.p2 = players.value.p2Hp / 2;
+			}, i);
+		}
+		// message timers
+		setTimeout(() => {
+			resultShow.message = resultAttackResultEffect(
+				eff,
+				players.value.p2
+			);
+		}, sleep.value);
+		sleep.value += 1000;
+		setTimeout(() => {
+			resultShow.message = `Opposing ${players.value.p2.name} fainted`;
+		}, sleep.value);
+		sleep.value += 1000;
+		setTimeout(() => {
+			resultShow.message = `Your ${players.value.p1.name} is the winner!`;
+		}, sleep.value);
+		sleep.value += 1000;
+		setTimeout(() => {
+			resultShow.show = false;
+			resultShow.message = "";
+		}, sleep.value);
+		sleep.value += 2000;
+	} else {
+		// message timers
+		setTimeout(() => {
+			resultShow.message = resultAttackResultEffect(
+				eff,
+				players.value.p2
+			);
+		}, sleep.value);
+		sleep.value += 1000;
+		// p2 HP reduce
+		for (let i = 0; i < move.damage * eff; i++) {
+			setTimeout(() => {
+				players.value.p2Hp--;
+				HPs.p2 = players.value.p2Hp / 2;
+			}, i);
+		}
+	}
+	if (players.value.p2Hp > 0) {
+		console.log(players.value);
+		let p2moves = players.value.p2.moves;
+		let randomMove = p2moves[Math.floor(Math.random() * p2moves.length)];
+		let eff2 = attackResultEffect(randomMove, players.value.p1);
+		setTimeout(() => {
+			resultShow.message = `Opposing ${players.value.p2.name} used ${randomMove.moveName}`;
+		}, 2000);
+		sleep.value += 1000;
+		if (eff2 * randomMove.damage > players.value.p1Hp) {
+			// p1 HP 0
+			for (let i = 0; i < players.value.p1Hp; i++) {
+				setTimeout(() => {
+					players.value.p1Hp--;
+					HPs.p1 = players.value.p1Hp / 2;
+				}, i);
+			}
+			// message timers
+			setTimeout(() => {
+				resultShow.message = resultAttackResultEffect(
+					eff2,
+					players.value.p1
+				);
+			}, sleep.value);
+			sleep.value += 1000;
+			setTimeout(() => {
+				resultShow.message = `Your ${players.value.p1.name} fainted`;
+			}, sleep.value);
+			sleep.value += 1000;
+			setTimeout(() => {
+				resultShow.message = `Opposing ${players.value.p2.name} is the winner!`;
+			}, sleep.value);
+			sleep.value += 1000;
+			setTimeout(() => {
+				resultShow.show = false;
+				resultShow.message = "";
+			}, sleep.value);
+			sleep.value += 1000;
+		} else {
+			// p1 HP reduce
+			for (let i = 0; i < eff2 * randomMove.damage; i++) {
+				setTimeout(() => {
+					players.value.p1Hp--;
+					HPs.p1 = players.value.p1Hp / 2;
+				}, i);
+			}
+			// message timers
+			setTimeout(() => {
+				resultShow.message = resultAttackResultEffect(
+					eff2,
+					players.value.p1
+				);
+				usingMove.value = false;
+			}, sleep.value);
+			sleep.value += 1000;
+			setTimeout(() => {
+				resultShow.show = false;
+				resultShow.message = "";
+			}, sleep.value);
+			sleep.value += 1000;
+		}
+	}
+	sleep.value = 1000;
+}
+let cameraPos = [0, 0, 5];
 </script>
 <template>
-	<div class="bg-transparent game-ui">
+	<div class="three-d">
+		<div class="attack-result" v-if="resultShow.show">
+			{{ resultShow.message }}
+		</div>
 		<div class="options">
 			<button
 				v-for="(move, i) in players.p1.moves"
 				:key="i"
+				:disabled="usingMove"
+				@click="fight(move)"
 				:class="'w-full moves ' + move.moveType"
 			>
 				<div>
@@ -62,20 +196,37 @@ let players = ref({
 				</div>
 			</button>
 		</div>
-	</div>
-	<div class="three-d">
-		<TresCanvas clear-color="#88F" v-bind="gl">
+		<div>
+			<v-progress-linear
+				class="p1-hp"
+				v-model="HPs.p1"
+				height="15"
+				color="green"
+				rounded
+			>
+			</v-progress-linear>
+			<v-progress-linear
+				class="p2-hp"
+				v-model="HPs.p2"
+				height="15"
+				color="green"
+				rounded
+			>
+			</v-progress-linear>
+		</div>
+		<TresCanvas clear-color="#88F" v-bind="gl" window-size>
 			<TresPerspectiveCamera
-				:position="[0, 0, 5]"
+				:position="cameraPos"
 				:rotation="[0, 0, 0]"
 			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
 			<!-- Player 1 -->
 			<Suspense>
 				<GLTFModel
-					path="/poke_ball.glb"
-					:position="[-2.5, -1, 0]"
-					v-log
+					:path="players.p1.src"
+					:position="players.p1.position"
+					:scale="players.p1.scale"
+					:rotation="[0, (5 * Math.PI) / 6, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
 				/>
@@ -89,14 +240,16 @@ let players = ref({
 				<TresMeshStandardMaterial color="#0f0" />
 			</TresMesh>
 			<!-- Player 2 -->
-			<TresMesh
-				:position="[2, 1.5, 0]"
-				:rotation="[0, Math.PI, 0]"
-				cast-shadow
-			>
-				<TresConeGeometry :args="[1, 1.5, 3]" />
-				<TresMeshToonMaterial color="#82DBC5" />
-			</TresMesh>
+			<Suspense>
+				<GLTFModel
+					:path="players.p2.src"
+					:position="posAdd(players.p2.position)"
+					:scale="players.p2.scale"
+					:rotation="[0, -Math.PI / 3, 0]"
+					v-bind="{ castShadow: true }"
+					:cast-shadow="true"
+				/>
+			</Suspense>
 			<TresMesh
 				:rotation="[
 					-Math.PI / 2.2,
@@ -111,10 +264,10 @@ let players = ref({
 			</TresMesh>
 			<TresDirectionalLight
 				:position="[0, 2, 0]"
-				:intensity="1"
+				:intensity="5"
 				cast-shadow
 			/>
-			<TresAmbientLight :intensity="0.5" />
+			<TresAmbientLight :intensity="1" />
 		</TresCanvas>
 	</div>
 </template>
@@ -122,6 +275,8 @@ let players = ref({
 .options {
 	border: 2px solid transparent;
 	width: 15vw;
+	margin-bottom: 3vh;
+	margin-right: 2vw;
 	height: calc(28vh + 20px * 3);
 	gap: 20px;
 	display: grid;
@@ -129,6 +284,8 @@ let players = ref({
 	bottom: 5vh;
 	position: fixed;
 	right: 5vh;
+	z-index: 1;
+	position: absolute;
 	border-image-slice: 1;
 }
 .three-d {
@@ -137,14 +294,7 @@ let players = ref({
 	margin: 0px;
 	position: static;
 	z-index: 0;
-}
-
-.game-ui {
-	width: 100vw;
-	height: 100vh;
-	margin: 0px;
-	position: absolute;
-	z-index: 1;
+	overflow: hidden;
 }
 
 @keyframes moveGradient {
@@ -152,7 +302,34 @@ let players = ref({
 		background-position: 100% 50%;
 	}
 }
-
+.attack-result {
+	position: absolute;
+	bottom: 0px;
+	right: 0;
+	height: 10vh;
+	left: 0;
+	width: 100%;
+	z-index: 2;
+	color: black;
+	padding: 50px;
+	text-align: left;
+	font-size: large;
+	background-color: bisque;
+}
+.p1-hp {
+	position: absolute;
+	z-index: 1;
+	width: 25vw;
+	left: 15vw;
+	margin-top: 55vh;
+}
+.p2-hp {
+	position: absolute;
+	z-index: 1;
+	width: 25vw;
+	left: 60vw;
+	margin-top: 20vh;
+}
 .moves {
 	border-image: radial-gradient(to bottom right, #ff0000, #00ff00) 1;
 	border: 2px solid transparent;
@@ -208,5 +385,14 @@ let players = ref({
 }
 .fire {
 	background-color: coral;
+}
+.water {
+	background-color: cornflowerblue;
+}
+.grass {
+	background-color: yellowgreen;
+}
+.poison {
+	background-color: slateblue;
 }
 </style>
