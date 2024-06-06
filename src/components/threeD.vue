@@ -196,22 +196,14 @@ let cameraPos = [0, 0, 5];
 				</div>
 			</button>
 		</div>
-		<div>
-			<v-progress-linear
-				class="p1-hp"
-				v-model="HPs.p1"
-				height="15"
-				color="green"
-				rounded
-			>
+		<div class="p1-hp">
+			<div>HP</div>
+			<v-progress-linear v-model="HPs.p1" height="25" color="green">
 			</v-progress-linear>
-			<v-progress-linear
-				class="p2-hp"
-				v-model="HPs.p2"
-				height="15"
-				color="green"
-				rounded
-			>
+		</div>
+		<div class="p2-hp">
+			<div>HP</div>
+			<v-progress-linear v-model="HPs.p2" height="25" color="green">
 			</v-progress-linear>
 		</div>
 		<TresCanvas clear-color="#88F" v-bind="gl" window-size>
@@ -319,13 +311,39 @@ let cameraPos = [0, 0, 5];
 .p1-hp {
 	position: absolute;
 	z-index: 1;
+	display: flex;
 	width: 25vw;
+	flex-direction: row;
 	left: 15vw;
 	margin-top: 55vh;
+}
+.p1-hp > div:first-child {
+	border-top-left-radius: 20px;
+	border-bottom-left-radius: 20px;
+	padding-right: 10px;
+	padding-left: 10px;
+	background-color: #00aa00;
+}
+.p1-hp > div:nth-child(2) {
+	border-top-right-radius: 20px;
+	border-bottom-right-radius: 20px;
+}
+.p2-hp > div:nth-child(2) {
+	border-top-right-radius: 20px;
+	border-bottom-right-radius: 20px;
+}
+.p2-hp > div:first-child {
+	padding-left: 10px;
+	border-top-left-radius: 20px;
+	border-bottom-left-radius: 20px;
+	padding-right: 10px;
+	background-color: #00aa00;
 }
 .p2-hp {
 	position: absolute;
 	z-index: 1;
+	flex-direction: row;
+	display: flex;
 	width: 25vw;
 	left: 60vw;
 	margin-top: 20vh;
