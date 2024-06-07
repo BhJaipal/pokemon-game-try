@@ -18,9 +18,9 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import * as THREE from "three";
-import { fireTypes, grassTypes } from "./../data/pokemons";
+import { fireTypes, grassTypes, waterTypes } from "./../data/pokemons";
 import { posAdd, resultAttackResultEffect } from "./../utils/pokemon-types";
 
 let gl = {
@@ -37,6 +37,7 @@ onMounted(() => {
 	focused.value = document.getElementsByClassName("moves")[focusedNo.value];
 	focused.value?.focus();
 });
+let team = [fireTypes.charmeleon, grassTypes.venasaur, waterTypes.wartortle];
 document.onkeydown = (e: KeyboardEvent) => {
 	if (e.key == "Enter" || e.key == "a") {
 		e.preventDefault();
@@ -72,6 +73,7 @@ document.onkeydown = (e: KeyboardEvent) => {
 		focused.value?.focus();
 	} else if (e.key == "s") {
 		movesShow.value = false;
+		switchPoke.value = false;
 		setTimeout(() => {
 			// @ts-ignore
 			focused.value =
@@ -82,14 +84,16 @@ document.onkeydown = (e: KeyboardEvent) => {
 };
 let sleep = ref(1000);
 let players = reactive({
-	p1: fireTypes.charmeleon,
+	p1: team[1],
 	p1Hp: 200,
 	p2Hp: 200,
 	p2: grassTypes.venasaur,
 });
-let HPs = reactive({
-	p1: players.p1Hp / 2,
-	p2: players.p2Hp / 2,
+let HPs = computed(() => {
+	return {
+		p1: players.p1Hp / 2,
+		p2: players.p2Hp / 2,
+	};
 });
 let resultShow = reactive({
 	message: "",
@@ -106,7 +110,6 @@ function fight(move: PokemonMove) {
 		for (let i = 0; i < players.p2Hp; i++) {
 			setTimeout(() => {
 				players.p2Hp--;
-				HPs.p2 = players.p2Hp / 2;
 			}, i);
 		}
 		// message timers
@@ -137,7 +140,6 @@ function fight(move: PokemonMove) {
 		for (let i = 0; i < move.damage * eff; i++) {
 			setTimeout(() => {
 				players.p2Hp--;
-				HPs.p2 = players.p2Hp / 2;
 			}, i);
 		}
 	}
@@ -156,7 +158,6 @@ function fight(move: PokemonMove) {
 				for (let i = 0; i < players.p1Hp; i++) {
 					setTimeout(() => {
 						players.p1Hp--;
-						HPs.p1 = players.p1Hp / 2;
 					}, i);
 				}
 				// message timers
@@ -185,7 +186,6 @@ function fight(move: PokemonMove) {
 				for (let i = 0; i < eff2 * randomMove.damage; i++) {
 					setTimeout(() => {
 						players.p1Hp--;
-						HPs.p1 = players.p1Hp / 2;
 					}, i);
 				}
 				// message timers
@@ -209,6 +209,7 @@ function fight(move: PokemonMove) {
 	sleep.value += 1000;
 }
 let movesShow = ref(false);
+let switchPoke = ref(false);
 let menuOptions = [
 	{
 		name: "Fight",
@@ -231,7 +232,7 @@ let menuOptions = [
 	{
 		name: "Switch",
 		onclick: () => {
-			console.log("Not available yet");
+			switchPoke.value = true;
 		},
 	},
 	{
@@ -274,6 +275,18 @@ let menuOptions = [
 						</div>
 					</div>
 				</button>
+			</template>
+			<template v-else-if="switchPoke">
+				<div class="switch-pokemon">
+					<button
+						v-for="(poke, i) in team"
+						:key="i"
+						class="pokemon-btn"
+					>
+						<div class="pokemon-name">{{ poke.name }}</div>
+						<img src="/pokeball.png" class="pokeball" />
+					</button>
+				</div>
 			</template>
 			<template v-else>
 				<button
@@ -375,11 +388,32 @@ let menuOptions = [
 	z-index: 0;
 	overflow: hidden;
 }
-
 @keyframes moveGradient {
 	50% {
 		background-position: 100% 50%;
 	}
+}
+.pokeball {
+	width: auto;
+	height: auto;
+}
+.pokemon-btn {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+.switch-pokemon {
+	position: absolute;
+	z-index: 2;
+	width: 100%;
+	top: 10vh;
+	bottom: 10vh;
+	left: 15vw;
+	right: 15vw;
+	background-color: transparent;
+	background-image: url(/background.jpeg);
+	padding: 5vh 10vw;
+	gap: 5vh 5vw;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .attack-result {
 	position: absolute;
@@ -410,7 +444,8 @@ let menuOptions = [
 	border-bottom-left-radius: 20px;
 	padding-right: 10px;
 	padding-left: 10px;
-	background-color: #00aa00;
+	font-weight: bold;
+	background-color: darkblue;
 }
 .p1-hp > div:nth-child(2) {
 	border-top-right-radius: 20px;
@@ -425,7 +460,8 @@ let menuOptions = [
 	border-top-left-radius: 20px;
 	border-bottom-left-radius: 20px;
 	padding-right: 10px;
-	background-color: #00aa00;
+	font-weight: bold;
+	background-color: darkblue;
 }
 .p2-hp {
 	position: absolute;
