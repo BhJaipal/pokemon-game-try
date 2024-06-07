@@ -32,15 +32,15 @@ let gl = {
 };
 
 let sleep = ref(1000);
-let players = ref({
+let players = reactive({
 	p1: fireTypes.charizard,
 	p1Hp: 200,
 	p2Hp: 200,
 	p2: grassTypes.venasaur,
 });
 let HPs = reactive({
-	p1: players.value.p1Hp / 2,
-	p2: players.value.p2Hp / 2,
+	p1: players.p1Hp / 2,
+	p2: players.p2Hp / 2,
 });
 let resultShow = reactive({
 	message: "",
@@ -50,30 +50,27 @@ let usingMove = ref(false);
 function fight(move: PokemonMove) {
 	usingMove.value = true;
 	resultShow.show = true;
-	resultShow.message = `${players.value.p1.name} used ${move.moveName}`;
-	let eff = attackResultEffect(move, players.value.p2);
-	if (eff * move.damage > players.value.p2Hp) {
+	resultShow.message = `${players.p1.name} used ${move.moveName}`;
+	let eff = attackResultEffect(move, players.p2);
+	if (eff * move.damage > players.p2Hp) {
 		// p2 HP 0
-		for (let i = 0; i < players.value.p2Hp; i++) {
+		for (let i = 0; i < players.p2Hp; i++) {
 			setTimeout(() => {
-				players.value.p2Hp--;
-				HPs.p2 = players.value.p2Hp / 2;
+				players.p2Hp--;
+				HPs.p2 = players.p2Hp / 2;
 			}, i);
 		}
 		// message timers
 		setTimeout(() => {
-			resultShow.message = resultAttackResultEffect(
-				eff,
-				players.value.p2
-			);
+			resultShow.message = resultAttackResultEffect(eff, players.p2);
 		}, sleep.value);
 		sleep.value += 1000;
 		setTimeout(() => {
-			resultShow.message = `Opposing ${players.value.p2.name} fainted`;
+			resultShow.message = `Opposing ${players.p2.name} fainted`;
 		}, sleep.value);
 		sleep.value += 1000;
 		setTimeout(() => {
-			resultShow.message = `Your ${players.value.p1.name} is the winner!`;
+			resultShow.message = `Your ${players.p1.name} is the winner!`;
 		}, sleep.value);
 		sleep.value += 1000;
 		setTimeout(() => {
@@ -84,85 +81,84 @@ function fight(move: PokemonMove) {
 	} else {
 		// message timers
 		setTimeout(() => {
-			resultShow.message = resultAttackResultEffect(
-				eff,
-				players.value.p2
-			);
+			resultShow.message = resultAttackResultEffect(eff, players.p2);
 		}, sleep.value);
 		sleep.value += 1000;
 		// p2 HP reduce
 		for (let i = 0; i < move.damage * eff; i++) {
 			setTimeout(() => {
-				players.value.p2Hp--;
-				HPs.p2 = players.value.p2Hp / 2;
+				players.p2Hp--;
+				HPs.p2 = players.p2Hp / 2;
 			}, i);
 		}
 	}
-	if (players.value.p2Hp > 0) {
-		console.log(players.value);
-		let p2moves = players.value.p2.moves;
-		let randomMove = p2moves[Math.floor(Math.random() * p2moves.length)];
-		let eff2 = attackResultEffect(randomMove, players.value.p1);
-		setTimeout(() => {
-			resultShow.message = `Opposing ${players.value.p2.name} used ${randomMove.moveName}`;
-		}, 2000);
-		sleep.value += 1000;
-		if (eff2 * randomMove.damage > players.value.p1Hp) {
-			// p1 HP 0
-			for (let i = 0; i < players.value.p1Hp; i++) {
+	setTimeout(() => {
+		if (players.p2Hp > 0) {
+			let p2moves = players.p2.moves;
+			let randomMove =
+				p2moves[Math.floor(Math.random() * p2moves.length)];
+			let eff2 = attackResultEffect(randomMove, players.p1);
+			setTimeout(() => {
+				resultShow.message = `Opposing ${players.p2.name} used ${randomMove.moveName}`;
+			}, 2000);
+			sleep.value += 1000;
+			if (eff2 * randomMove.damage > players.p1Hp) {
+				// p1 HP 0
+				for (let i = 0; i < players.p1Hp; i++) {
+					setTimeout(() => {
+						players.p1Hp--;
+						HPs.p1 = players.p1Hp / 2;
+					}, i);
+				}
+				// message timers
 				setTimeout(() => {
-					players.value.p1Hp--;
-					HPs.p1 = players.value.p1Hp / 2;
-				}, i);
-			}
-			// message timers
-			setTimeout(() => {
-				resultShow.message = resultAttackResultEffect(
-					eff2,
-					players.value.p1
-				);
-			}, sleep.value);
-			sleep.value += 1000;
-			setTimeout(() => {
-				resultShow.message = `Your ${players.value.p1.name} fainted`;
-			}, sleep.value);
-			sleep.value += 1000;
-			setTimeout(() => {
-				resultShow.message = `Opposing ${players.value.p2.name} is the winner!`;
-			}, sleep.value);
-			sleep.value += 1000;
-			setTimeout(() => {
-				resultShow.show = false;
-				resultShow.message = "";
-			}, sleep.value);
-			sleep.value += 1000;
-		} else {
-			// p1 HP reduce
-			for (let i = 0; i < eff2 * randomMove.damage; i++) {
+					resultShow.message = resultAttackResultEffect(
+						eff2,
+						players.p1
+					);
+				}, sleep.value);
+				sleep.value += 1000;
 				setTimeout(() => {
-					players.value.p1Hp--;
-					HPs.p1 = players.value.p1Hp / 2;
-				}, i);
+					resultShow.message = `Your ${players.p1.name} fainted`;
+				}, sleep.value);
+				sleep.value += 1000;
+				setTimeout(() => {
+					resultShow.message = `Opposing ${players.p2.name} is the winner!`;
+				}, sleep.value);
+				sleep.value += 1000;
+				setTimeout(() => {
+					resultShow.show = false;
+					resultShow.message = "";
+				}, sleep.value);
+				sleep.value += 1000;
+			} else {
+				// p1 HP reduce
+				for (let i = 0; i < eff2 * randomMove.damage; i++) {
+					setTimeout(() => {
+						players.p1Hp--;
+						HPs.p1 = players.p1Hp / 2;
+					}, i);
+				}
+				// message timers
+				setTimeout(() => {
+					resultShow.message = resultAttackResultEffect(
+						eff2,
+						players.p1
+					);
+					usingMove.value = false;
+				}, sleep.value);
+				sleep.value += 1000;
+				setTimeout(() => {
+					resultShow.show = false;
+					resultShow.message = "";
+				}, sleep.value);
+				sleep.value += 1000;
 			}
-			// message timers
-			setTimeout(() => {
-				resultShow.message = resultAttackResultEffect(
-					eff2,
-					players.value.p1
-				);
-				usingMove.value = false;
-			}, sleep.value);
-			sleep.value += 1000;
-			setTimeout(() => {
-				resultShow.show = false;
-				resultShow.message = "";
-			}, sleep.value);
-			sleep.value += 1000;
 		}
-	}
-	sleep.value = 1000;
+		sleep.value = 1000;
+	}, sleep.value);
+	sleep.value += 1000;
 }
-let cameraPos = [0, 0, 4.5];
 </script>
 <template>
 	<div class="three-d">
@@ -208,8 +204,8 @@ let cameraPos = [0, 0, 4.5];
 		</div>
 		<TresCanvas clear-color="#88F" v-bind="gl" window-size>
 			<TresPerspectiveCamera
-				:position="cameraPos"
-				:rotation="[0, 0, 0]"
+				:position="[-4, 0.5, 2.5]"
+				:rotation="[0, -Math.PI / 4, 0]"
 			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
 			<!-- Player 1 -->
@@ -236,7 +232,7 @@ let cameraPos = [0, 0, 4.5];
 			</Suspense>
 			<!-- Ground and Lights -->
 			<TresMesh
-				:rotation="[-Math.PI / 2.4, 0, 0]"
+				:rotation="[-Math.PI / 2, 0, 0]"
 				:position="[0, 0, 0]"
 				receive-shadow
 			>
@@ -303,8 +299,8 @@ let cameraPos = [0, 0, 4.5];
 	display: flex;
 	width: 25vw;
 	flex-direction: row;
-	left: 12vw;
-	margin-top: 20vh;
+	left: 30vw;
+	margin-top: 30vh;
 }
 .p1-hp > div:first-child {
 	border-top-left-radius: 20px;
@@ -334,8 +330,8 @@ let cameraPos = [0, 0, 4.5];
 	flex-direction: row;
 	display: flex;
 	width: 25vw;
-	left: 62vw;
-	margin-top: 20vh;
+	left: 63vw;
+	margin-top: 30vh;
 }
 .moves {
 	border-image: radial-gradient(to bottom right, #ff0000, #00ff00) 1;
