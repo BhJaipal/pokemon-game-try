@@ -18,7 +18,7 @@ export default {
 };
 </script>
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import * as THREE from "three";
 import { fireTypes, grassTypes } from "./../data/pokemons";
 import { posAdd, resultAttackResultEffect } from "./../utils/pokemon-types";
@@ -30,10 +30,45 @@ let gl = {
 	outputColorSpace: THREE.SRGBColorSpace,
 	toneMapping: THREE.NoToneMapping,
 };
-
+let focusedNo = ref(0);
+let focused = ref<null | HTMLButtonElement>(null);
+onMounted(() => {
+	focused.value = document.getElementsByClassName("moves")[focusedNo.value];
+	focused.value?.focus();
+});
+document.onkeydown = (e: KeyboardEvent) => {
+	console.log(e);
+	if (e.key == "Enter" || e.key == "a") {
+		e.preventDefault();
+		let moveFocused = players.p1.moves.find(
+			(el) => focused.value?.textContent?.match(el.moveName)?.length != 0
+		);
+		if (moveFocused) {
+			fight(moveFocused);
+		}
+	} else if (e.code == "ArrowDown") {
+		if (focusedNo.value == players.p1.moves.length - 1) {
+			focusedNo.value = 0;
+		} else {
+			focusedNo.value++;
+		}
+		focused.value =
+			document.getElementsByClassName("moves")[focusedNo.value];
+		focused.value?.focus();
+	} else if (e.code == "ArrowUp") {
+		if (focusedNo.value == 0) {
+			focusedNo.value = players.p1.moves.length - 1;
+		} else {
+			focusedNo.value--;
+		}
+		focused.value =
+			document.getElementsByClassName("moves")[focusedNo.value];
+		focused.value?.focus();
+	}
+};
 let sleep = ref(1000);
 let players = reactive({
-	p1: fireTypes.charizard,
+	p1: fireTypes.charmander,
 	p1Hp: 200,
 	p2Hp: 200,
 	p2: grassTypes.venasaur,
@@ -204,7 +239,7 @@ function fight(move: PokemonMove) {
 		</div>
 		<TresCanvas clear-color="#88F" v-bind="gl" window-size>
 			<TresPerspectiveCamera
-				:position="[-4, 0.5, 2.5]"
+				:position="[-3.5, 0.5, 3]"
 				:rotation="[0, -Math.PI / 4, 0]"
 			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
@@ -299,7 +334,7 @@ function fight(move: PokemonMove) {
 	display: flex;
 	width: 25vw;
 	flex-direction: row;
-	left: 30vw;
+	left: 20vw;
 	margin-top: 30vh;
 }
 .p1-hp > div:first-child {
@@ -330,7 +365,7 @@ function fight(move: PokemonMove) {
 	flex-direction: row;
 	display: flex;
 	width: 25vw;
-	left: 63vw;
+	left: 55vw;
 	margin-top: 30vh;
 }
 .moves {
@@ -344,8 +379,8 @@ function fight(move: PokemonMove) {
 	border-radius: 100px;
 	border-radius: 3px;
 }
-.moves::after {
-	--border-width: 5px;
+.moves:focus::after {
+	--border-width: 6px;
 	position: absolute;
 	content: "";
 	top: calc(-1 * var(--border-width));
