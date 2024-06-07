@@ -2,7 +2,7 @@
 import { OrbitControls, GLTFModel, FBXModel, vLog } from "@tresjs/cientos";
 import { attackResultEffect, howMuchEffective } from "./../utils/pokemon-types";
 import { TresCanvas } from "@tresjs/core";
-import { PokemonMove } from "../utils/types";
+import { Pokemon, PokemonMove } from "../utils/types";
 export default {
 	name: "three-d",
 	directives: {
@@ -40,14 +40,38 @@ onMounted(() => {
 let team = [fireTypes.charmeleon, grassTypes.venasaur, waterTypes.wartortle];
 document.onkeydown = (e: KeyboardEvent) => {
 	if (e.key == "Enter" || e.key == "a") {
-		e.preventDefault();
 		focused.value?.click();
+		if (
+			switchPoke.value &&
+			focused.value?.classList.contains("pokemon-btn")
+		) {
+			switchPoke.value = false;
+			focusedNo.value = 0;
+			setTimeout(() => {
+				// @ts-ignore
+				focused.value =
+					document.getElementsByClassName("moves")[focusedNo.value];
+				focused.value?.focus();
+			}, 300);
+		}
 		watch(usingMove, (val) => {
 			if (val == false) {
 				focused.value?.focus();
 			}
 		});
 	} else if (e.code == "ArrowDown") {
+		if (switchPoke.value) {
+			if (focusedNo.value == team.length - 1) {
+				focusedNo.value = 0;
+			} else {
+				focusedNo.value++;
+			}
+			// @ts-ignore
+			focused.value =
+				document.getElementsByClassName("pokemon-btn")[focusedNo.value];
+			focused.value?.focus();
+			return;
+		}
 		if (movesShow.value && focusedNo.value == players.p1.moves.length - 1) {
 			focusedNo.value = 0;
 		} else if (focusedNo.value == 3) {
@@ -60,6 +84,18 @@ document.onkeydown = (e: KeyboardEvent) => {
 			document.getElementsByClassName("moves")[focusedNo.value];
 		focused.value?.focus();
 	} else if (e.code == "ArrowUp") {
+		if (switchPoke.value) {
+			if (focusedNo.value == 0) {
+				focusedNo.value = team.length - 1;
+			} else {
+				focusedNo.value--;
+			}
+			// @ts-ignore
+			focused.value =
+				document.getElementsByClassName("pokemon-btn")[focusedNo.value];
+			focused.value?.focus();
+			return;
+		}
 		if (focusedNo.value == 0 && movesShow.value) {
 			focusedNo.value = players.p1.moves.length - 1;
 		} else if (focusedNo.value == 0) {
@@ -209,6 +245,15 @@ function fight(move: PokemonMove) {
 	sleep.value += 1000;
 }
 let movesShow = ref(false);
+let pokemonSwitchFocus = computed<Pokemon | undefined>(() => {
+	if (switchPoke.value) {
+		let focusPoke = team.find(
+			(el) => el.name == focused.value?.textContent
+		);
+		return focusPoke;
+	}
+	return undefined;
+});
 let switchPoke = ref(false);
 let menuOptions = [
 	{
@@ -233,6 +278,12 @@ let menuOptions = [
 		name: "Switch",
 		onclick: () => {
 			switchPoke.value = true;
+			setTimeout(() => {
+				// @ts-ignore
+				focused.value =
+					document.getElementsByClassName("pokemon-btn")[0];
+				focused.value?.focus();
+			}, 300);
 		},
 	},
 	{
@@ -249,7 +300,7 @@ let menuOptions = [
 			{{ resultShow.message }}
 		</div>
 		<div class="options">
-			<template v-if="movesShow">
+			<template v-if="movesShow && !switchPoke">
 				<button
 					v-for="(move, i) in players.p1.moves"
 					:key="i"
@@ -278,14 +329,48 @@ let menuOptions = [
 			</template>
 			<template v-else-if="switchPoke">
 				<div class="switch-pokemon">
-					<button
-						v-for="(poke, i) in team"
-						:key="i"
-						class="pokemon-btn"
-					>
-						<div class="pokemon-name">{{ poke.name }}</div>
-						<img src="/pokeball.png" class="pokeball" />
-					</button>
+					<div>
+						<button
+							v-for="(poke, i) in team"
+							:key="i"
+							@click="() => (players.p1 = poke)"
+							class="pokemon-btn"
+						>
+							<img src="/pokeball.png" class="pokeball" />
+							<div class="pokemon-name">{{ poke.name }}</div>
+						</button>
+					</div>
+					<div>
+						<button
+							v-for="(move, i) in pokemonSwitchFocus?.moves"
+							:key="i"
+							disabled
+							:class="'w-full moves ' + move.moveType"
+						>
+							<div class="flex flex-col move-name-box">
+								<div class="move-name">{{ move.moveName }}</div>
+								<div>
+									{{
+										howMuchEffective(
+											attackResultEffect(move, players.p2)
+										)
+									}}
+								</div>
+							</div>
+							<div class="flex flex-col">
+								<img
+									class="move-type"
+									:src="
+										'/types-icon/' + move.moveType + '.svg'
+									"
+									:alt="move.moveType"
+								/>
+								<div class="font-extrabold">
+									{{ move.moveType.toUpperCase() }}
+								</div>
+							</div>
+						</button>
+					</div>
 				</div>
 			</template>
 			<template v-else>
@@ -299,7 +384,7 @@ let menuOptions = [
 				</button>
 			</template>
 		</div>
-		<div class="p1-hp">
+		<div class="p1-hp" v-if="!switchPoke">
 			<div>HP</div>
 			<v-progress-linear
 				v-model="HPs.p1"
@@ -308,7 +393,7 @@ let menuOptions = [
 			>
 			</v-progress-linear>
 		</div>
-		<div class="p2-hp">
+		<div class="p2-hp" v-if="!switchPoke">
 			<div>HP</div>
 			<v-progress-linear
 				v-model="HPs.p2"
@@ -395,25 +480,83 @@ let menuOptions = [
 }
 .pokeball {
 	width: auto;
-	height: auto;
+	height: 5vh;
+}
+.pokemon-name {
+	margin-left: 2vw;
+	font-size: larger;
+	font-weight: bolder;
 }
 .pokemon-btn {
-	background-color: rgba(0, 0, 0, 0.1);
+	display: flex;
+	flex-direction: row;
+	height: 7vh;
+	width: 100%;
+	background-color: white;
+}
+.pokemon-btn:focus {
+	border: 2px solid seagreen;
+}
+.pokemon-btn:hover {
+	border: 0;
+}
+.pokemon-btn:hover:focus {
+	border: 2px solid seagreen;
+	outline: 0px;
 }
 .switch-pokemon {
 	position: absolute;
 	z-index: 2;
-	width: 100%;
-	top: 10vh;
+	height: 80vh;
+	width: 70vw;
 	bottom: 10vh;
-	left: 15vw;
 	right: 15vw;
-	background-color: transparent;
-	background-image: url(/background.jpeg);
-	padding: 5vh 10vw;
-	gap: 5vh 5vw;
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.switch-pokemon > div:first-child {
+	padding: 5vh 5vw;
+	gap: 5vh 0;
+	display: flex;
+	color: black;
+	background: tomato;
+	flex-direction: column;
+}
+.switch-pokemon > div:nth-child(2) {
+	width: 100%;
+	gap: 5vh 0;
+	background: lightgray;
+	padding: 5vh 5vw;
+	display: flex;
+	flex-direction: column;
+}
+.switch-pokemon .moves {
+	background: white;
+	color: black;
+	border-radius: 50px;
+}
+.switch-pokemon .moves .move-type {
+	height: 3vh;
+	width: auto;
+}
+.switch-pokemon .moves .move-name-box + div {
+	align-items: center;
+}
+.switch-pokemon .moves .move-name-box {
+	text-align: left;
+}
+.switch-pokemon .moves .move-name-box div:nth-child(2) {
+	font-weight: normal;
+}
+.switch-pokemon .moves .move-name-box .move-name {
+	font-weight: bolder;
+}
+
+.switch-pokemon .moves div:nth-child(2) {
+	display: flex;
+	gap: 0 10px;
+	font-weight: bolder;
+	flex-direction: row;
 }
 .attack-result {
 	position: absolute;
@@ -448,10 +591,12 @@ let menuOptions = [
 	background-color: darkblue;
 }
 .p1-hp > div:nth-child(2) {
+	z-index: inherit;
 	border-top-right-radius: 20px;
 	border-bottom-right-radius: 20px;
 }
 .p2-hp > div:nth-child(2) {
+	z-index: inherit;
 	border-top-right-radius: 20px;
 	border-bottom-right-radius: 20px;
 }
