@@ -114,3 +114,33 @@ export const waterTypes = {
 		"/water/blastoise.glb"
 	),
 };
+export const fairyTypes = {
+	gardevoir: new Pokemon(
+		["fairy", "psychic"],
+		"Gardevoir",
+		[
+			moves.psychic.psychic,
+			moves.fairy.dazzlingGleam,
+			moves.fairy.moonblast,
+			moves.ghost.shadowBall,
+		],
+		[0.05, 0.05, 0.05],
+		[-2, 0, 0],
+		"/fairy/gardevoir.glb"
+	),
+};
+export const dragon = {
+	garchomp: new Pokemon(
+		["dragon", "ground"],
+		"Garchomp",
+		[
+			moves.dragon.dragonClaw,
+			moves.ground.earthquake,
+			moves.dragon.dragonRush,
+			moves.ground.earthquake,
+		],
+		[0.05, 0.05, 0.05],
+		[-2, 0, 0],
+		"/dragon/garchomp.glb"
+	),
+};

@@ -1,8 +1,7 @@
 <script lang="ts">
 import { OrbitControls, GLTFModel, FBXModel, vLog } from "@tresjs/cientos";
-import { attackResultEffect, howMuchEffective } from "./../utils/pokemon-types";
+import { attackResultEffect, howMuchEffective } from "./../utils";
 import { TresCanvas } from "@tresjs/core";
-import { Pokemon, PokemonMove } from "../utils/types";
 export default {
 	name: "three-d",
 	directives: {
@@ -18,10 +17,22 @@ export default {
 };
 </script>
 <script setup lang="ts">
+import pokeball from "./../assets/pokeball-neon.png";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import * as THREE from "three";
-import { fireTypes, grassTypes, waterTypes } from "./../data/pokemons";
-import { posAdd, resultAttackResultEffect } from "./../utils/pokemon-types";
+import {
+	fairyTypes,
+	fireTypes,
+	grassTypes,
+	waterTypes,
+} from "./../data/pokemons";
+import {
+	posAdd,
+	resultAttackResultEffect,
+	Pokemon,
+	pokemonAI,
+	PokemonMove,
+} from "./../utils";
 
 let gl = {
 	shadows: true,
@@ -34,10 +45,11 @@ let focusedNo = ref(0);
 let focused = ref<null | HTMLButtonElement>(null);
 onMounted(() => {
 	// @ts-ignore
-	focused.value = document.getElementsByClassName("moves")[focusedNo.value];
+	focused.value =
+		document.getElementsByClassName("menu-opt")[focusedNo.value];
 	focused.value?.focus();
 });
-let team = [fireTypes.charmeleon, grassTypes.venasaur, waterTypes.wartortle];
+let team = [fairyTypes.gardevoir, grassTypes.venasaur, waterTypes.wartortle];
 document.onkeydown = (e: KeyboardEvent) => {
 	if (e.key == "Enter" || e.key == "a") {
 		focused.value?.click();
@@ -83,6 +95,12 @@ document.onkeydown = (e: KeyboardEvent) => {
 		focused.value =
 			document.getElementsByClassName("moves")[focusedNo.value];
 		focused.value?.focus();
+		if (!movesShow.value) {
+			// @ts-ignore
+			focused.value =
+				document.getElementsByClassName("menu-opt")[focusedNo.value];
+			focused.value?.focus();
+		}
 	} else if (e.code == "ArrowUp") {
 		if (switchPoke.value) {
 			if (focusedNo.value == 0) {
@@ -107,6 +125,12 @@ document.onkeydown = (e: KeyboardEvent) => {
 		focused.value =
 			document.getElementsByClassName("moves")[focusedNo.value];
 		focused.value?.focus();
+		if (!movesShow.value) {
+			// @ts-ignore
+			focused.value =
+				document.getElementsByClassName("menu-opt")[focusedNo.value];
+			focused.value?.focus();
+		}
 	} else if (e.key == "s") {
 		movesShow.value = false;
 		switchPoke.value = false;
@@ -119,8 +143,9 @@ document.onkeydown = (e: KeyboardEvent) => {
 	}
 };
 let sleep = ref(1000);
+// players
 let players = reactive({
-	p1: team[1],
+	p1: team[2],
 	p1Hp: 200,
 	p2Hp: 200,
 	p2: grassTypes.venasaur,
@@ -182,8 +207,7 @@ function fight(move: PokemonMove) {
 	setTimeout(() => {
 		if (players.p2Hp > 0) {
 			let p2moves = players.p2.moves;
-			let randomMove =
-				p2moves[Math.floor(Math.random() * p2moves.length)];
+			let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
 			let eff2 = attackResultEffect(randomMove, players.p1);
 			setTimeout(() => {
 				resultShow.message = `Opposing ${players.p2.name} used ${randomMove.moveName}`;
@@ -258,6 +282,7 @@ let switchPoke = ref(false);
 let menuOptions = [
 	{
 		name: "Fight",
+		img: pokeball,
 		onclick: () => {
 			movesShow.value = true;
 			setTimeout(() => {
@@ -270,12 +295,14 @@ let menuOptions = [
 	},
 	{
 		name: "Bag",
+		img: pokeball,
 		onclick: () => {
 			console.log("Not available yet");
 		},
 	},
 	{
-		name: "Switch",
+		name: "Pokemon",
+		img: pokeball,
 		onclick: () => {
 			switchPoke.value = true;
 			setTimeout(() => {
@@ -288,6 +315,7 @@ let menuOptions = [
 	},
 	{
 		name: "Run",
+		img: pokeball,
 		onclick: () => {
 			console.log("Not available yet");
 		},
@@ -375,12 +403,13 @@ let menuOptions = [
 			</template>
 			<template v-else>
 				<button
-					class="w-full menu-opt moves"
+					class="w-full menu-opt"
 					v-for="(option, i) in menuOptions"
 					:key="i"
 					@click="option.onclick"
 				>
-					{{ option.name }}
+					<img :src="option.img" />
+					<div>{{ option.name }}</div>
 				</button>
 			</template>
 		</div>
@@ -619,23 +648,70 @@ let menuOptions = [
 	margin-top: 35vh;
 }
 .menu-opt {
-	background-color: burlywood !important;
+	background-color: white;
 	font-size: larger;
+	border: 0px solid transparent;
+	color: black;
+	border-image: inherit;
+	text-align: left;
 	font-weight: bolder;
+	align-items: center;
+	position: relative;
+	display: flex;
+	flex-direction: row-reverse;
+	border-radius: 50px;
+}
+.menu-opt img {
+	height: 3vh;
+	width: auto;
+	transform: rotate(45deg);
+}
+.menu-opt:focus img {
+	height: 3vh;
+	width: auto;
+	filter: invert(1);
+}
+.menu-opt div {
+	width: 100%;
+}
+.menu-opt:focus {
+	background-color: rgba(0, 0, 0, 0.9);
+	color: white;
+}
+.menu-opt:focus:after {
+	background: linear-gradient(
+		60deg,
+		hsl(224, 100%, 48%),
+		hsl(134, 85%, 0%),
+		hsl(224, 100%, 48%),
+		hsl(179, 85%, 0%),
+		hsl(224, 85%, 66%)
+	);
+	--border-width: 3px;
+	position: absolute;
+	content: "";
+	top: calc(-1.5 * var(--border-width));
+	left: calc(-1.5 * var(--border-width));
+	z-index: -1;
+	width: calc(100% + var(--border-width) * 3);
+	height: calc(100% + var(--border-width) * 3);
+	background-size: 300% 300%;
+	background-position: 0 50%;
+	border: 0;
+	border-radius: calc(15 * var(--border-width));
+	animation: moveGradient 2s linear infinite;
 }
 .moves {
-	border-image: radial-gradient(to bottom right, #ff0000, #00ff00) 1;
-	border: 2px solid transparent;
+	border: 0px solid transparent;
 	background-color: aliceblue;
 	color: black;
 	border-image: inherit;
 	position: relative;
 	display: flex;
-	border-radius: 100px;
-	border-radius: 3px;
+	border-radius: 5px;
 }
 .moves:focus::after {
-	--border-width: 6px;
+	--border-width: 3px;
 	position: absolute;
 	content: "";
 	top: calc(-1 * var(--border-width));
