@@ -28,7 +28,7 @@ export const fireTypes = {
 		"Charizard",
 		[
 			moves.fire.flamethrower,
-			moves.fire.fireBlast,
+			moves.electric.thunderPunch,
 			moves.dragon.dragonClaw,
 			moves.flying.fly,
 		],
@@ -126,21 +126,21 @@ export const fairyTypes = {
 		],
 		[0.05, 0.05, 0.05],
 		[-2, 0, 0],
-		"/fairy/gardevoir.glb"
+		"/water/blastoise.glb"
 	),
 };
-export const dragon = {
+export const dragonTypes = {
 	garchomp: new Pokemon(
 		["dragon", "ground"],
 		"Garchomp",
 		[
 			moves.dragon.dragonClaw,
-			moves.ground.earthquake,
+			moves.rock.rockTomb,
 			moves.dragon.dragonRush,
 			moves.ground.earthquake,
 		],
 		[0.05, 0.05, 0.05],
 		[-2, 0, 0],
-		"/dragon/garchomp.glb"
+		"/water/blastoise.glb"
 	),
 };

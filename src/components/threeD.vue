@@ -21,6 +21,7 @@ import pokeball from "./../assets/pokeball-neon.png";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import * as THREE from "three";
 import {
+	dragonTypes,
 	fairyTypes,
 	fireTypes,
 	grassTypes,
@@ -49,7 +50,12 @@ onMounted(() => {
 		document.getElementsByClassName("menu-opt")[focusedNo.value];
 	focused.value?.focus();
 });
-let team = [fairyTypes.gardevoir, grassTypes.venasaur, waterTypes.wartortle];
+let team = [
+	fairyTypes.gardevoir,
+	grassTypes.venasaur,
+	waterTypes.wartortle,
+	dragonTypes.garchomp,
+];
 document.onkeydown = (e: KeyboardEvent) => {
 	if (e.key == "Enter" || e.key == "a") {
 		focused.value?.click();
@@ -136,19 +142,19 @@ document.onkeydown = (e: KeyboardEvent) => {
 		switchPoke.value = false;
 		setTimeout(() => {
 			// @ts-ignore
-			focused.value =
-				document.getElementsByClassName("moves")[focusedNo.value];
+			focused.value = document.getElementsByClassName("menu-opt")[0];
 			focused.value?.focus();
-		}, 500);
+			focusedNo.value = 0;
+		}, 200);
 	}
 };
 let sleep = ref(1000);
 // players
 let players = reactive({
-	p1: team[2],
+	p1: team[3],
 	p1Hp: 200,
 	p2Hp: 200,
-	p2: grassTypes.venasaur,
+	p2: fireTypes.charizard,
 });
 let HPs = computed(() => {
 	return {
@@ -478,6 +484,7 @@ let menuOptions = [
 	</div>
 </template>
 <style scoped>
+@import url(./../assets/css/poke-switch.css);
 .options {
 	border: 2px solid transparent;
 	width: 15vw;
@@ -533,60 +540,7 @@ let menuOptions = [
 	border: 2px solid seagreen;
 	outline: 0px;
 }
-.switch-pokemon {
-	position: absolute;
-	z-index: 2;
-	height: 80vh;
-	width: 70vw;
-	bottom: 10vh;
-	right: 15vw;
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.switch-pokemon > div:first-child {
-	padding: 5vh 5vw;
-	gap: 5vh 0;
-	display: flex;
-	color: black;
-	background: tomato;
-	flex-direction: column;
-}
-.switch-pokemon > div:nth-child(2) {
-	width: 100%;
-	gap: 5vh 0;
-	background: lightgray;
-	padding: 5vh 5vw;
-	display: flex;
-	flex-direction: column;
-}
-.switch-pokemon .moves {
-	background: white;
-	color: black;
-	border-radius: 50px;
-}
-.switch-pokemon .moves .move-type {
-	height: 3vh;
-	width: auto;
-}
-.switch-pokemon .moves .move-name-box + div {
-	align-items: center;
-}
-.switch-pokemon .moves .move-name-box {
-	text-align: left;
-}
-.switch-pokemon .moves .move-name-box div:nth-child(2) {
-	font-weight: normal;
-}
-.switch-pokemon .moves .move-name-box .move-name {
-	font-weight: bolder;
-}
 
-.switch-pokemon .moves div:nth-child(2) {
-	display: flex;
-	gap: 0 10px;
-	font-weight: bolder;
-	flex-direction: row;
-}
 .attack-result {
 	position: absolute;
 	bottom: 0px;
@@ -702,7 +656,6 @@ let menuOptions = [
 	animation: moveGradient 2s linear infinite;
 }
 .moves {
-	border: 0px solid transparent;
 	background-color: aliceblue;
 	color: black;
 	border-image: inherit;
@@ -746,6 +699,7 @@ let menuOptions = [
 	height: 4vh;
 	float: left;
 }
+/* types color */
 .flying {
 	background-color: aqua;
 }
@@ -763,5 +717,20 @@ let menuOptions = [
 }
 .poison {
 	background-color: slateblue;
+}
+.ghost {
+	background-color: rebeccapurple;
+}
+.fairy {
+	background-color: fuchsia;
+}
+.psychic {
+	background-color: pink;
+}
+.ground {
+	background-color: #b18006;
+}
+.rock {
+	background-color: #b0a8a2;
 }
 </style>
