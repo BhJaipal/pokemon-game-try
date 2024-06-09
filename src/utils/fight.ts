@@ -72,8 +72,8 @@ export function attack(
 			}
 		}
 		// 2 p2
-		if (players.p2Hp == 0) return;
 		setTimeout(() => {
+			if (players.p2Hp <= 0) return;
 			let p2moves = players.p2.moves;
 			let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
 			resultShow.message = `Opponent ${poke.name} used ${move.moveName}`;
@@ -123,9 +123,9 @@ export function attack(
 		let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
 		resultShow.message = `Opponent's ${oppo.name} used ${randomMove.moveName}`;
 		let eff2 = attackResultEffect(randomMove, poke);
-		if (eff2 * randomMove.damage > players.p2Hp) {
+		if (eff2 * randomMove.damage >= players.p1Hp) {
 			// p2 HP 0
-			for (let i = 0; i < players.p2Hp; i++) {
+			for (let i = 0; i < players.p1Hp; i++) {
 				setTimeout(() => {
 					players.p1Hp--;
 				}, i);
@@ -162,8 +162,9 @@ export function attack(
 			}
 		}
 		// 4 p1
-		if (players.p1Hp == 0) return;
 		setTimeout(() => {
+			if (players.p1Hp <= 0) return;
+			console.log(players.p1Hp, players.p2Hp);
 			resultShow.message = `${poke.name} used ${move.moveName}`;
 			let eff = attackResultEffect(move, oppo);
 			if (eff * move.damage > players.p2Hp) {
