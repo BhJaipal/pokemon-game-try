@@ -226,10 +226,10 @@ export function attackResultEffect(move: PokemonMove, target: Pokemon) {
 		];
 		if (effs[0] == 0 || effs[1] == 0) {
 			return 0;
-		} else if (effs[0] == 0.5 && [1, 2].includes(effs[1])) {
-			return effs[1];
-		} else if (effs[1] == 0.5 && [1, 2].includes(effs[0])) {
+		} else if (effs[0] == 0.5 && effs[1] == 1) {
 			return effs[0];
+		} else if (effs[1] == 0.5 && effs[0] == 1) {
+			return effs[1];
 		} else {
 			return effs[0] * effs[1];
 		}

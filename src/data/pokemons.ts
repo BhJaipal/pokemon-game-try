@@ -8,7 +8,11 @@ export const fireTypes = {
 		[moves.normal.scratch, moves.normal.tackle, moves.fire.ember],
 		[0.1, 0.1, 0.1],
 		[-2, 0, 0],
-		"/fire/charmander.glb"
+		"/fire/charmander.glb",
+		{
+			hp: 39,
+			speed: 65,
+		}
 	),
 	charmeleon: new Pokemon(
 		"fire",
@@ -21,7 +25,11 @@ export const fireTypes = {
 		],
 		[0.14, 0.14, 0.14],
 		[-2, 0.47, 0],
-		"/fire/charmeleon.glb"
+		"/fire/charmeleon.glb",
+		{
+			hp: 58,
+			speed: 80,
+		}
 	),
 	charizard: new Pokemon(
 		"fire",
@@ -34,7 +42,11 @@ export const fireTypes = {
 		],
 		[0.05, 0.05, 0.05],
 		[-2, 0, 0],
-		"/fire/charizard.glb"
+		"/fire/charizard.glb",
+		{
+			hp: 78,
+			speed: 100,
+		}
 	),
 };
 export const grassTypes = {
@@ -49,7 +61,11 @@ export const grassTypes = {
 		],
 		[0.08, 0.08, 0.08],
 		[-2, 0, 0],
-		"/grass/bulbasaur.glb"
+		"/grass/bulbasaur.glb",
+		{
+			hp: 45,
+			speed: 45,
+		}
 	),
 	ivysaur: new Pokemon(
 		"grass",
@@ -62,7 +78,11 @@ export const grassTypes = {
 		],
 		[0.008, 0.008, 0.008],
 		[-1.5, 0, 0],
-		"/grass/ivysaur.glb"
+		"/grass/ivysaur.glb",
+		{
+			hp: 60,
+			speed: 60,
+		}
 	),
 	venasaur: new Pokemon(
 		"grass",
@@ -75,7 +95,11 @@ export const grassTypes = {
 		],
 		[0.035, 0.035, 0.035],
 		[-2, 0, 0],
-		"/grass/venusaur.glb"
+		"/grass/venusaur.glb",
+		{
+			hp: 80,
+			speed: 80,
+		}
 	),
 };
 export const waterTypes = {
@@ -85,7 +109,11 @@ export const waterTypes = {
 		[moves.water.waterGun, moves.water.waterPulse, moves.normal.tackle],
 		[0.12, 0.12, 0.12],
 		[-2, 0.28, 0],
-		"/water/squirtle.glb"
+		"/water/squirtle.glb",
+		{
+			hp: 44,
+			speed: 43,
+		}
 	),
 	wartortle: new Pokemon(
 		"water",
@@ -98,7 +126,11 @@ export const waterTypes = {
 		],
 		[0.13, 0.13, 0.13],
 		[-2, 0.38, 0],
-		"/water/wartortle.glb"
+		"/water/wartortle.glb",
+		{
+			hp: 59,
+			speed: 58,
+		}
 	),
 	blastoise: new Pokemon(
 		"water",
@@ -111,7 +143,11 @@ export const waterTypes = {
 		],
 		[0.05, 0.05, 0.05],
 		[-2, 0, 0],
-		"/water/blastoise.glb"
+		"/water/blastoise.glb",
+		{
+			hp: 79,
+			speed: 78,
+		}
 	),
 };
 export const fairyTypes = {
@@ -126,7 +162,11 @@ export const fairyTypes = {
 		],
 		[0.05, 0.05, 0.05],
 		[-2, 0, 0],
-		"/water/blastoise.glb"
+		"/water/blastoise.glb",
+		{
+			hp: 68,
+			speed: 80,
+		}
 	),
 };
 export const dragonTypes = {
@@ -141,6 +181,10 @@ export const dragonTypes = {
 		],
 		[0.05, 0.05, 0.05],
 		[-2, 0, 0],
-		"/water/blastoise.glb"
+		"/water/blastoise.glb",
+		{
+			hp: 108,
+			speed: 102,
+		}
 	),
 };

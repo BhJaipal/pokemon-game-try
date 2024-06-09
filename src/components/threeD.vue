@@ -1,5 +1,5 @@
 <script lang="ts">
-import { OrbitControls, GLTFModel, FBXModel, vLog } from "@tresjs/cientos";
+import { OrbitControls, GLTFModel, vLog } from "@tresjs/cientos";
 import { attackResultEffect, howMuchEffective } from "./../utils";
 import { TresCanvas } from "@tresjs/core";
 export default {
@@ -10,7 +10,6 @@ export default {
 	components: {
 		OrbitControls,
 		GLTFModel,
-		FBXModel,
 		TresCanvas,
 	},
 	methods: { attackResultEffect, howMuchEffective },
@@ -27,13 +26,7 @@ import {
 	grassTypes,
 	waterTypes,
 } from "./../data/pokemons";
-import {
-	posAdd,
-	resultAttackResultEffect,
-	Pokemon,
-	pokemonAI,
-	PokemonMove,
-} from "./../utils";
+import { posAdd, Pokemon, PokemonMove, attack } from "./../utils";
 
 let gl = {
 	shadows: true,
@@ -151,15 +144,15 @@ document.onkeydown = (e: KeyboardEvent) => {
 let sleep = ref(1000);
 // players
 let players = reactive({
-	p1: team[3],
-	p1Hp: 200,
-	p2Hp: 200,
+	p1: team[2],
+	p1Hp: team[2].stats.hp,
+	p2Hp: fireTypes.charizard.stats.hp,
 	p2: fireTypes.charizard,
 });
 let HPs = computed(() => {
 	return {
-		p1: players.p1Hp / 2,
-		p2: players.p2Hp / 2,
+		p1: (players.p1Hp / players.p1.stats.hp) * 100,
+		p2: (players.p2Hp / players.p2.stats.hp) * 100,
 	};
 });
 let resultShow = reactive({
@@ -170,108 +163,7 @@ let usingMove = ref(false);
 function fight(move: PokemonMove) {
 	usingMove.value = true;
 	resultShow.show = true;
-	resultShow.message = `${players.p1.name} used ${move.moveName}`;
-	let eff = attackResultEffect(move, players.p2);
-	if (eff * move.damage > players.p2Hp) {
-		// p2 HP 0
-		for (let i = 0; i < players.p2Hp; i++) {
-			setTimeout(() => {
-				players.p2Hp--;
-			}, i);
-		}
-		// message timers
-		setTimeout(() => {
-			resultShow.message = resultAttackResultEffect(eff, players.p2);
-		}, sleep.value);
-		sleep.value += 1000;
-		setTimeout(() => {
-			resultShow.message = `Opposing ${players.p2.name} fainted`;
-		}, sleep.value);
-		sleep.value += 1000;
-		setTimeout(() => {
-			resultShow.message = `Your ${players.p1.name} is the winner!`;
-		}, sleep.value);
-		sleep.value += 1000;
-		setTimeout(() => {
-			resultShow.show = false;
-			resultShow.message = "";
-		}, sleep.value);
-		sleep.value += 2000;
-	} else {
-		// message timers
-		setTimeout(() => {
-			resultShow.message = resultAttackResultEffect(eff, players.p2);
-		}, sleep.value);
-		sleep.value += 1000;
-		// p2 HP reduce
-		for (let i = 0; i < move.damage * eff; i++) {
-			setTimeout(() => {
-				players.p2Hp--;
-			}, i);
-		}
-	}
-	setTimeout(() => {
-		if (players.p2Hp > 0) {
-			let p2moves = players.p2.moves;
-			let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
-			let eff2 = attackResultEffect(randomMove, players.p1);
-			setTimeout(() => {
-				resultShow.message = `Opposing ${players.p2.name} used ${randomMove.moveName}`;
-			}, 2000);
-			sleep.value += 1000;
-			if (eff2 * randomMove.damage > players.p1Hp) {
-				// p1 HP 0
-				for (let i = 0; i < players.p1Hp; i++) {
-					setTimeout(() => {
-						players.p1Hp--;
-					}, i);
-				}
-				// message timers
-				setTimeout(() => {
-					resultShow.message = resultAttackResultEffect(
-						eff2,
-						players.p1
-					);
-				}, sleep.value);
-				sleep.value += 1000;
-				setTimeout(() => {
-					resultShow.message = `Your ${players.p1.name} fainted`;
-				}, sleep.value);
-				sleep.value += 1000;
-				setTimeout(() => {
-					resultShow.message = `Opposing ${players.p2.name} is the winner!`;
-				}, sleep.value);
-				sleep.value += 1000;
-				setTimeout(() => {
-					resultShow.show = false;
-					resultShow.message = "";
-				}, sleep.value);
-				sleep.value += 1000;
-			} else {
-				// p1 HP reduce
-				for (let i = 0; i < eff2 * randomMove.damage; i++) {
-					setTimeout(() => {
-						players.p1Hp--;
-					}, i);
-				}
-				// message timers
-				setTimeout(() => {
-					resultShow.message = resultAttackResultEffect(
-						eff2,
-						players.p1
-					);
-					usingMove.value = false;
-				}, sleep.value);
-				sleep.value += 1000;
-				setTimeout(() => {
-					resultShow.show = false;
-					resultShow.message = "";
-				}, sleep.value);
-				sleep.value += 1000;
-			}
-		}
-		sleep.value = 1000;
-	}, sleep.value);
+	attack(move, players.p1, players.p2, resultShow, usingMove, sleep, players);
 	sleep.value += 1000;
 }
 let movesShow = ref(false);
@@ -452,6 +344,7 @@ let menuOptions = [
 					:rotation="[0, Math.PI / 2, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
+					v-log
 				/>
 			</Suspense>
 			<!-- Player 2 -->
@@ -463,6 +356,7 @@ let menuOptions = [
 					:rotation="[0, -Math.PI / 2, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
+					v-log
 				/>
 			</Suspense>
 			<!-- Ground and Lights -->

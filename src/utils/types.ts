@@ -20,6 +20,10 @@ export type PokemonTypeNames =
 export type PokemonMovesList =
 	| [PokemonMove, PokemonMove, PokemonMove, PokemonMove]
 	| [PokemonMove, PokemonMove, PokemonMove];
+export type Stats = {
+	speed: number;
+	hp: number;
+};
 export class Pokemon {
 	constructor(
 		public type: PokemonTypeNames | [PokemonTypeNames, PokemonTypeNames],
@@ -28,6 +32,7 @@ export class Pokemon {
 		public scale: [number, number, number] = [1, 1, 1],
 		public position: [number, number, number] = [-2.5, -1, 0],
 		public src = "",
+		public stats: Stats,
 		public levitate = false
 	) {}
 }
