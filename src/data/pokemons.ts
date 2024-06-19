@@ -12,6 +12,8 @@ export const fireTypes = {
 		{
 			hp: 39,
 			speed: 65,
+			fainted: false,
+			currectHP: 39,
 		}
 	),
 	charmeleon: new Pokemon(
@@ -29,6 +31,8 @@ export const fireTypes = {
 		{
 			hp: 58,
 			speed: 80,
+			fainted: false,
+			currectHP: 58,
 		}
 	),
 	charizard: new Pokemon(
@@ -46,6 +50,8 @@ export const fireTypes = {
 		{
 			hp: 78,
 			speed: 100,
+			fainted: false,
+			currectHP: 78,
 		}
 	),
 };
@@ -65,6 +71,8 @@ export const grassTypes = {
 		{
 			hp: 45,
 			speed: 45,
+			fainted: false,
+			currectHP: 45,
 		}
 	),
 	ivysaur: new Pokemon(
@@ -82,6 +90,8 @@ export const grassTypes = {
 		{
 			hp: 60,
 			speed: 60,
+			fainted: false,
+			currectHP: 60,
 		}
 	),
 	venasaur: new Pokemon(
@@ -99,6 +109,8 @@ export const grassTypes = {
 		{
 			hp: 80,
 			speed: 80,
+			currectHP: 80,
+			fainted: false,
 		}
 	),
 };
@@ -113,6 +125,8 @@ export const waterTypes = {
 		{
 			hp: 44,
 			speed: 43,
+			fainted: false,
+			currectHP: 44,
 		}
 	),
 	wartortle: new Pokemon(
@@ -130,6 +144,8 @@ export const waterTypes = {
 		{
 			hp: 59,
 			speed: 58,
+			fainted: false,
+			currectHP: 59,
 		}
 	),
 	blastoise: new Pokemon(
@@ -147,6 +163,8 @@ export const waterTypes = {
 		{
 			hp: 79,
 			speed: 78,
+			fainted: false,
+			currectHP: 79,
 		}
 	),
 };
@@ -166,6 +184,8 @@ export const fairyTypes = {
 		{
 			hp: 68,
 			speed: 80,
+			fainted: false,
+			currectHP: 68,
 		}
 	),
 };
@@ -185,6 +205,8 @@ export const dragonTypes = {
 		{
 			hp: 108,
 			speed: 102,
+			fainted: false,
+			currectHP: 108,
 		}
 	),
 };

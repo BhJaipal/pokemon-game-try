@@ -26,7 +26,13 @@ import {
 	grassTypes,
 	waterTypes,
 } from "./../data/pokemons";
-import { posAdd, Pokemon, PokemonMove, attack } from "./../utils";
+import {
+	posAdd,
+	Pokemon,
+	PokemonMove,
+	resultAttackResultEffect,
+	pokemonAI,
+} from "./../utils";
 
 let gl = {
 	shadows: true,
@@ -46,9 +52,24 @@ onMounted(() => {
 let team = [
 	fairyTypes.gardevoir,
 	grassTypes.venasaur,
-	waterTypes.wartortle,
+	waterTypes.blastoise,
 	dragonTypes.garchomp,
+	fireTypes.charizard,
 ];
+// moves use
+let movesUseResult = reactive<string[]>([]);
+let resultCounter = ref(0);
+watch(movesUseResult, () => {
+	if (movesUseResult.length != 0) {
+		setTimeout(() => {
+			resultShow.show = true;
+			resultShow.message = movesUseResult.shift() as string;
+		}, (resultCounter.value / 4) * 1000);
+	} else {
+		resultShow.show = false;
+		resultShow.message = "";
+	}
+});
 document.onkeydown = (e: KeyboardEvent) => {
 	if (e.key == "Enter" || e.key == "a") {
 		focused.value?.click();
@@ -70,6 +91,10 @@ document.onkeydown = (e: KeyboardEvent) => {
 				focused.value?.focus();
 			}
 		});
+		if (focused.value?.classList.contains("moves")) {
+		} else if (focused.value?.classList.contains("pokemon-btn")) {
+		} else {
+		}
 	} else if (e.code == "ArrowDown") {
 		if (switchPoke.value) {
 			if (focusedNo.value == team.length - 1) {
@@ -141,13 +166,14 @@ document.onkeydown = (e: KeyboardEvent) => {
 		}, 200);
 	}
 };
+let key = ref([1, 2]);
 let sleep = ref(1000);
 // players
 let players = reactive({
-	p1: team[2],
-	p1Hp: team[2].stats.hp,
-	p2Hp: fireTypes.charizard.stats.hp,
-	p2: fireTypes.charizard,
+	p1: team[4],
+	p1Hp: team[4].stats.currectHP,
+	p2Hp: grassTypes.venasaur.stats.currectHP,
+	p2: grassTypes.venasaur,
 });
 let HPs = computed(() => {
 	return {
@@ -159,11 +185,30 @@ let resultShow = reactive({
 	message: "",
 	show: false,
 });
-let usingMove = ref(false);
+let usingMove = computed(() => {
+	return movesUseResult.length != 0 && !players.p1Hp && !players.p2Hp;
+});
+// fight func
 function fight(move: PokemonMove) {
-	usingMove.value = true;
-	resultShow.show = true;
-	attack(move, players.p1, players.p2, resultShow, usingMove, sleep, players);
+	if (players.p1.stats.speed > players.p2.stats.speed) {
+		attack2(move, players.p1, players.p2);
+		setTimeout(() => {
+			if (players.p2Hp <= 0) return;
+			let p2moves = players.p2.moves;
+			let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
+			attack2(randomMove, players.p2, players.p1, true);
+			resultCounter.value = 0;
+		}, resultCounter.value * 1000);
+	} else {
+		let p2moves = players.p2.moves;
+		let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
+		attack2(randomMove, players.p2, players.p1, true);
+		setTimeout(() => {
+			if (players.p1Hp <= 0) return;
+			attack2(move, players.p1, players.p2);
+			resultCounter.value = 0;
+		}, resultCounter.value * 1000);
+	}
 	sleep.value += 1000;
 }
 let movesShow = ref(false);
@@ -192,13 +237,6 @@ let menuOptions = [
 		},
 	},
 	{
-		name: "Bag",
-		img: pokeball,
-		onclick: () => {
-			console.log("Not available yet");
-		},
-	},
-	{
 		name: "Pokemon",
 		img: pokeball,
 		onclick: () => {
@@ -219,6 +257,56 @@ let menuOptions = [
 		},
 	},
 ];
+function attack2(
+	move: PokemonMove,
+	poke: Pokemon,
+	oppo: Pokemon,
+	isOpponent = false
+) {
+	console.log(resultCounter.value);
+	movesUseResult.push(
+		`${isOpponent ? "Opposing " : ""}${poke.name} used ${move.moveName}`
+	);
+	resultCounter.value++;
+	let eff = attackResultEffect(move, oppo);
+	if (eff * move.damage > (isOpponent ? players.p1Hp : players.p2Hp)) {
+		// p2 HP 0
+		for (let i = 0; i < (isOpponent ? players.p1Hp : players.p2Hp); i++) {
+			setTimeout(() => {
+				if (isOpponent) {
+					players.p1Hp--;
+				} else {
+					players.p2Hp--;
+				}
+			}, i);
+		}
+		// message timers
+		movesUseResult.push(resultAttackResultEffect(eff, oppo));
+		resultCounter.value++;
+		movesUseResult.push(
+			`${isOpponent ? "Your" : "Oppenent's"} ${oppo.name} fainted`
+		);
+		resultCounter.value++;
+		movesUseResult.push(
+			`${isOpponent ? "Oppenent's" : "Your"} ${poke.name} is the winner!`
+		);
+		resultCounter.value++;
+	} else {
+		// message timers
+		movesUseResult.push(resultAttackResultEffect(eff, oppo));
+		resultCounter.value++;
+		// p2 HP reduce
+		for (let i = 0; i < move.damage * eff; i++) {
+			setTimeout(() => {
+				if (isOpponent) {
+					players.p1Hp--;
+				} else {
+					players.p2Hp--;
+				}
+			}, i);
+		}
+	}
+}
 </script>
 <template>
 	<div class="three-d">
@@ -230,9 +318,9 @@ let menuOptions = [
 				<button
 					v-for="(move, i) in players.p1.moves"
 					:key="i"
-					:disabled="usingMove"
+					:disabled="resultShow.show"
 					@click="fight(move)"
-					:class="'w-full moves ' + move.moveType"
+					:class="'w-full moves move-use ' + move.moveType"
 				>
 					<div>
 						<img
@@ -259,8 +347,9 @@ let menuOptions = [
 						<button
 							v-for="(poke, i) in team"
 							:key="i"
+							:disabled="poke.stats.currectHP <= 0"
 							@click="() => (players.p1 = poke)"
-							class="pokemon-btn"
+							class="pokemon-btn move-use"
 						>
 							<img src="/pokeball.png" class="pokeball" />
 							<div class="pokemon-name">{{ poke.name }}</div>
@@ -301,9 +390,10 @@ let menuOptions = [
 			</template>
 			<template v-else>
 				<button
-					class="w-full menu-opt"
+					class="w-full menu-opt move-use"
 					v-for="(option, i) in menuOptions"
 					:key="i"
+					:disabled="resultShow.show"
 					@click="option.onclick"
 				>
 					<img :src="option.img" />
@@ -336,7 +426,7 @@ let menuOptions = [
 			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
 			<!-- Player 1 -->
-			<Suspense>
+			<Suspense :key="key[0]">
 				<GLTFModel
 					:path="players.p1.src"
 					:position="players.p1.position"
@@ -344,11 +434,10 @@ let menuOptions = [
 					:rotation="[0, Math.PI / 2, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
-					v-log
 				/>
 			</Suspense>
 			<!-- Player 2 -->
-			<Suspense>
+			<Suspense :key="key[1]">
 				<GLTFModel
 					:path="players.p2.src"
 					:position="posAdd(players.p2.position)"
@@ -356,7 +445,6 @@ let menuOptions = [
 					:rotation="[0, -Math.PI / 2, 0]"
 					v-bind="{ castShadow: true }"
 					:cast-shadow="true"
-					v-log
 				/>
 			</Suspense>
 			<!-- Ground and Lights -->
@@ -626,5 +714,11 @@ let menuOptions = [
 }
 .rock {
 	background-color: #b0a8a2;
+}
+.normal {
+	background-color: white;
+}
+.electric {
+	background-color: gold;
 }
 </style>

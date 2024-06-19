@@ -22,6 +22,8 @@ export type PokemonMovesList =
 	| [PokemonMove, PokemonMove, PokemonMove];
 export type Stats = {
 	speed: number;
+	currectHP: number;
+	fainted: boolean;
 	hp: number;
 };
 export class Pokemon {
