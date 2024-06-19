@@ -110,7 +110,7 @@ document.onkeydown = (e: KeyboardEvent) => {
 		}
 		if (movesShow.value && focusedNo.value == players.p1.moves.length - 1) {
 			focusedNo.value = 0;
-		} else if (focusedNo.value == 3) {
+		} else if (focusedNo.value == 2) {
 			focusedNo.value = 0;
 		} else {
 			focusedNo.value++;
@@ -141,7 +141,7 @@ document.onkeydown = (e: KeyboardEvent) => {
 		if (focusedNo.value == 0 && movesShow.value) {
 			focusedNo.value = players.p1.moves.length - 1;
 		} else if (focusedNo.value == 0) {
-			focusedNo.value = 3;
+			focusedNo.value = 2;
 		} else {
 			focusedNo.value--;
 		}
@@ -166,19 +166,16 @@ document.onkeydown = (e: KeyboardEvent) => {
 		}, 200);
 	}
 };
-let key = ref([1, 2]);
 let sleep = ref(1000);
 // players
 let players = reactive({
 	p1: team[4],
-	p1Hp: team[4].stats.currectHP,
-	p2Hp: grassTypes.venasaur.stats.currectHP,
 	p2: grassTypes.venasaur,
 });
 let HPs = computed(() => {
 	return {
-		p1: (players.p1Hp / players.p1.stats.hp) * 100,
-		p2: (players.p2Hp / players.p2.stats.hp) * 100,
+		p1: (players.p1.stats.currectHP / players.p1.stats.hp) * 100,
+		p2: (players.p2.stats.currectHP / players.p2.stats.hp) * 100,
 	};
 });
 let resultShow = reactive({
@@ -186,14 +183,18 @@ let resultShow = reactive({
 	show: false,
 });
 let usingMove = computed(() => {
-	return movesUseResult.length != 0 && !players.p1Hp && !players.p2Hp;
+	return (
+		movesUseResult.length != 0 &&
+		!players.p1.stats.currectHP &&
+		!players.p2.stats.currectHP
+	);
 });
 // fight func
 function fight(move: PokemonMove) {
 	if (players.p1.stats.speed > players.p2.stats.speed) {
 		attack2(move, players.p1, players.p2);
 		setTimeout(() => {
-			if (players.p2Hp <= 0) return;
+			if (players.p2.stats.currectHP <= 0) return;
 			let p2moves = players.p2.moves;
 			let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
 			attack2(randomMove, players.p2, players.p1, true);
@@ -204,7 +205,7 @@ function fight(move: PokemonMove) {
 		let randomMove = p2moves[pokemonAI(players.p2, players.p1)];
 		attack2(randomMove, players.p2, players.p1, true);
 		setTimeout(() => {
-			if (players.p1Hp <= 0) return;
+			if (players.p1.stats.currectHP <= 0) return;
 			attack2(move, players.p1, players.p2);
 			resultCounter.value = 0;
 		}, resultCounter.value * 1000);
@@ -269,14 +270,24 @@ function attack2(
 	);
 	resultCounter.value++;
 	let eff = attackResultEffect(move, oppo);
-	if (eff * move.damage > (isOpponent ? players.p1Hp : players.p2Hp)) {
+	if (
+		eff * move.damage >
+		(isOpponent ? players.p1.stats.currectHP : players.p2.stats.currectHP)
+	) {
 		// p2 HP 0
-		for (let i = 0; i < (isOpponent ? players.p1Hp : players.p2Hp); i++) {
+		for (
+			let i = 0;
+			i <
+			(isOpponent
+				? players.p1.stats.currectHP
+				: players.p2.stats.currectHP);
+			i++
+		) {
 			setTimeout(() => {
 				if (isOpponent) {
-					players.p1Hp--;
+					players.p1.stats.currectHP--;
 				} else {
-					players.p2Hp--;
+					players.p2.stats.currectHP--;
 				}
 			}, i);
 		}
@@ -299,9 +310,9 @@ function attack2(
 		for (let i = 0; i < move.damage * eff; i++) {
 			setTimeout(() => {
 				if (isOpponent) {
-					players.p1Hp--;
+					players.p1.stats.currectHP--;
 				} else {
-					players.p2Hp--;
+					players.p2.stats.currectHP--;
 				}
 			}, i);
 		}
@@ -318,8 +329,8 @@ function attack2(
 				<button
 					v-for="(move, i) in players.p1.moves"
 					:key="i"
-					:disabled="resultShow.show"
-					@click="fight(move)"
+					:disabled="!HPs.p1 && !HPs.p2"
+					@click="!HPs.p1 || !HPs.p2 ? () => {} : fight(move)"
 					:class="'w-full moves move-use ' + move.moveType"
 				>
 					<div>
@@ -352,7 +363,18 @@ function attack2(
 							class="pokemon-btn move-use"
 						>
 							<img src="/pokeball.png" class="pokeball" />
-							<div class="pokemon-name">{{ poke.name }}</div>
+							<div class="pokemon-name">
+								<div>
+									{{ poke.name }}
+								</div>
+								<v-progress-linear
+									height="15"
+									:value="
+										poke.stats.currectHP / poke.stats.hp
+									"
+									color="rgba(255, 0, 0, 1)"
+								/>
+							</div>
 						</button>
 					</div>
 					<div>
@@ -426,7 +448,7 @@ function attack2(
 			/>
 			<OrbitControls :enable-zoom="false" :enable-rotate="false" />
 			<!-- Player 1 -->
-			<Suspense :key="key[0]">
+			<Suspense>
 				<GLTFModel
 					:path="players.p1.src"
 					:position="players.p1.position"
@@ -437,7 +459,7 @@ function attack2(
 				/>
 			</Suspense>
 			<!-- Player 2 -->
-			<Suspense :key="key[1]">
+			<Suspense>
 				<GLTFModel
 					:path="players.p2.src"
 					:position="posAdd(players.p2.position)"
@@ -504,6 +526,11 @@ function attack2(
 	margin-left: 2vw;
 	font-size: larger;
 	font-weight: bolder;
+	display: flex;
+	flex-direction: column;
+}
+.pokemon-name {
+	width: 10vw;
 }
 .pokemon-btn {
 	display: flex;
@@ -513,14 +540,15 @@ function attack2(
 	background-color: white;
 }
 .pokemon-btn:focus {
-	border: 2px solid seagreen;
+	border: 0px;
+	outline: 5px solid gold;
 }
 .pokemon-btn:hover {
-	border: 0;
+	outline: 0;
 }
 .pokemon-btn:hover:focus {
-	border: 2px solid seagreen;
-	outline: 0px;
+	outline: 5px solid gold;
+	border: 0px;
 }
 
 .attack-result {
